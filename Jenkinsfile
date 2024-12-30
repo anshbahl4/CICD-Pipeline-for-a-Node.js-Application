@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   environment {
+    GIT_CREDENTIALS = credentials('531268fe-91a2-473d-a58d-a2f5404221c2')
     DOCKER_IMAGE = 'nodejs-ci-cd'
     DOCKER_TAG = 'latest'
   }
@@ -39,5 +40,5 @@ pipeline {
         }
       }
     }
-  }
+  } 
 }
