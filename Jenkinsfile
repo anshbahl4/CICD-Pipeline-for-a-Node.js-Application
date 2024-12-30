@@ -2,7 +2,6 @@ pipeline {
   agent any
 
   environment {
-    GIT_CREDENTIALS = credentials('531268fe-91a2-473d-a58d-a2f5404221c2')
     DOCKER_IMAGE = 'nodejs-ci-cd'
     DOCKER_TAG = 'latest'
   }
@@ -10,7 +9,11 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git credentialsId: "${GIT_CREDENTIALS}", url: 'https://github.com/anshbahl4/CICD-Pipeline-for-a-Node.js-Application.git'
+        withCredentials([usernamePassword(credentialsId: '531268fe-91a2-473d-a58d-a2f5404221c2', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASSWORD')]) {
+          sh """
+          git clone https://${GIT_USER}:${GIT_PASSWORD}@github.com/anshbahl4/CICD-Pipeline-for-a-Node.js-Application.git .
+          """
+        }
       }
     }
 
@@ -35,9 +38,11 @@ pipeline {
 
     stage('Deploy') {
       steps {
-        script {
-          withDockerRegistry([credentialsId: "${GIT_CREDENTIALS}", url: 'https://index.docker.io/v1/']) {
-            docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
+        withCredentials([usernamePassword(credentialsId: '531268fe-91a2-473d-a58d-a2f5404221c2', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASSWORD')]) {
+          script {
+            docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_USER}:${DOCKER_PASSWORD}") {
+              docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
+            }
           }
         }
       }
