@@ -10,7 +10,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git 'https://github.com/your-github-username/node-ci-cd.git'
+        git credentialsId: "${GIT_CREDENTIALS}", url: 'https://github.com/anshbahl4/CICD-Pipeline-for-a-Node.js-Application.git'
       }
     }
 
@@ -27,7 +27,7 @@ pipeline {
         script {
           docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").inside {
             sh 'npm install'
-            sh 'npm test'  // You can add unit tests here later
+            sh 'npm test'
           }
         }
       }
@@ -36,9 +36,11 @@ pipeline {
     stage('Deploy') {
       steps {
         script {
-          docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
+          withDockerRegistry([credentialsId: "${GIT_CREDENTIALS}", url: 'https://index.docker.io/v1/']) {
+            docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
+          }
         }
       }
     }
-  } 
+  }
 }
